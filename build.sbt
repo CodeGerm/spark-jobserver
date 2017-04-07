@@ -130,10 +130,13 @@ lazy val dockerSettings = Seq(
     val artifact = (assemblyOutputPath in assembly in jobServerExtras).value
     val artifactTargetPath = s"/app/${artifact.name}"
 
-    val sparkBuild = s"spark-${Versions.spark}"
+    val sparkBuild = s"spark-${Versions.spark}-bin-hadoop2.6"
     val sparkBuildCmd = scalaBinaryVersion.value match {
       case "2.11" =>
-        "./make-distribution.sh -Dscala-2.11 -Phadoop-2.7 -Phive"
+      """
+          |./dev/change-scala-version.sh 2.11 && \
+          |./dev/make-distribution.sh -Dscala-2.11 -Phadoop-2.6 -Dhadoop.version=2.6.0 -Phive -DskipTests
+      """.stripMargin.trim
       case other => throw new RuntimeException(s"Scala version $other is not supported!")
     }
 
@@ -167,12 +170,8 @@ lazy val dockerSettings = Seq(
         s"""
            |wget http://d3kbcqa49mib13.cloudfront.net/$sparkBuild.tgz && \\
            |tar -xvf $sparkBuild.tgz && \\
-           |cd $sparkBuild && \\
-           |$sparkBuildCmd && \\
-           |cd .. && \\
-           |mv $sparkBuild/dist /spark && \\
-           |rm $sparkBuild.tgz && \\
-           |rm -r $sparkBuild
+           |mv $sparkBuild /spark && \\
+           |rm $sparkBuild.tgz
         """.stripMargin.trim
       )
       volume("/database")
