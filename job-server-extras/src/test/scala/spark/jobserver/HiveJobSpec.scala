@@ -14,7 +14,7 @@ import scala.util.{Failure, Success, Try}
 class TestHiveContextFactory extends HiveContextFactory {
   override protected def contextFactory(conf: SparkConf): C = {
     val sc = SparkContext.getOrCreate(conf)
-    Try(new TestHiveContext(sc) with HiveContextLike) match {
+    Try(new TestHiveContext(sc) with HiveContextLike ) match {
       case Success(hc) => hc
       case Failure(e) =>
         sc.stop
