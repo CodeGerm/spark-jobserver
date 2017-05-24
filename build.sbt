@@ -130,7 +130,9 @@ lazy val dockerSettings = Seq(
     val artifact = (assemblyOutputPath in assembly in jobServerExtras).value
     val artifactTargetPath = s"/app/${artifact.name}"
 
-    val sparkBuild = s"spark-${Versions.spark}-bin-hadoop2.6"
+    //val sparkBuild = s"spark-${Versions.spark}-bin-hadoop2.6"
+    val sparkBuild = s"SPARK2-2.1.0.cloudera1-1.cdh5.7.0.p0.120904"
+
     val sparkBuildCmd = scalaBinaryVersion.value match {
       case "2.11" =>
       """
@@ -147,10 +149,8 @@ lazy val dockerSettings = Seq(
       expose(9999) // for JMX
       env("MESOS_VERSION", Versions.mesos)
       runRaw(
-        """echo "deb http://repos.mesosphere.io/ubuntu/ trusty main" > /etc/apt/sources.list.d/mesosphere.list && \
-                apt-key adv --keyserver keyserver.ubuntu.com --recv E56151BF && \
+        """     apt-key adv --keyserver keyserver.ubuntu.com --recv E56151BF && \
                 apt-get -y update && \
-                apt-get -y install mesos=${MESOS_VERSION} && \
                 apt-get clean
              """)
       copy(artifact, artifactTargetPath)
@@ -168,10 +168,38 @@ lazy val dockerSettings = Seq(
       run("mkdir", "-p", "/database")
       runRaw(
         s"""
-           |wget http://d3kbcqa49mib13.cloudfront.net/$sparkBuild.tgz && \\
-           |tar -xvf $sparkBuild.tgz && \\
-           |mv $sparkBuild /spark && \\
-           |rm $sparkBuild.tgz
+           |wget http://archive.cloudera.com/spark2/parcels/2.1.0/$sparkBuild-trusty.parcel && \\
+           |mv $sparkBuild-trusty.parcel $sparkBuild-trusty.gz && \\
+           |gunzip  $sparkBuild-trusty.gz && \\
+           |tar -xvf $sparkBuild-trusty && \\
+           |mv $sparkBuild/lib/spark2 /spark && \\
+           |rm -Rf /spark/conf && \\
+           |mkdir /spark/conf && \\
+           |rm -Rf /spark/work && \\
+           |rm $sparkBuild-trusty && \\
+           |rm -Rf $sparkBuild && \\
+           |cd  /spark/jars && \\
+           |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-common/2.6.0-cdh5.10.1/hadoop-common-2.6.0-cdh5.10.1.jar && \\
+           |wget http://central.maven.org/maven2/org/slf4j/slf4j-api/1.7.16/slf4j-api-1.7.16.jar && \\
+           |wget http://central.maven.org/maven2/org/slf4j/slf4j-log4j12/1.7.16/slf4j-log4j12-1.7.16.jar && \\
+           |wget http://central.maven.org/maven2/log4j/log4j/1.2.17/log4j-1.2.17.jar && \\
+           |wget http://central.maven.org/maven2/commons-configuration/commons-configuration/1.6/commons-configuration-1.6.jar && \\
+           |wget http://central.maven.org/maven2/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar && \\
+           |wget http://central.maven.org/maven2/commons-beanutils/commons-beanutils-core/1.8.0/commons-beanutils-core-1.8.0.jar && \\
+           |wget http://central.maven.org/maven2/com/google/guava/guava/14.0.1/guava-14.0.1.jar && \\
+           |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-auth/2.6.0-cdh5.10.1/hadoop-auth-2.6.0-cdh5.10.1.jar && \\
+           |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-annotations/2.6.0-cdh5.10.1/hadoop-annotations-2.6.0-cdh5.10.1.jar && \\
+           |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-client/2.6.0-cdh5.10.1/hadoop-client-2.6.0-cdh5.10.1.jar && \\
+           |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-hdfs/2.6.0-cdh5.10.1/hadoop-hdfs-2.6.0-cdh5.10.1.jar && \\
+           |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-mapreduce-client-app/2.6.0-cdh5.10.1/hadoop-mapreduce-client-app-2.6.0-cdh5.10.1.jar && \\
+           |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-mapreduce-client-common/2.6.0-cdh5.10.1/hadoop-mapreduce-client-common-2.6.0-cdh5.10.1.jar && \\
+           |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-mapreduce-client-core/2.6.0-cdh5.10.1/hadoop-mapreduce-client-core-2.6.0-cdh5.10.1.jar && \\
+           |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-mapreduce-client-jobclient/2.6.0-cdh5.10.1/hadoop-mapreduce-client-jobclient-2.6.0-cdh5.10.1.jar && \\
+           |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-mapreduce-client-shuffle/2.6.0-cdh5.10.1/hadoop-mapreduce-client-shuffle-2.6.0-cdh5.10.1.jar && \\
+           |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-yarn-api/2.6.0-cdh5.10.1/hadoop-yarn-api-2.6.0-cdh5.10.1.jar && \\
+           |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-yarn-client/2.6.0-cdh5.10.1/hadoop-yarn-client-2.6.0-cdh5.10.1.jar && \\
+           |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-yarn-common/2.6.0-cdh5.10.1/hadoop-yarn-common-2.6.0-cdh5.10.1.jar && \\
+           |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-yarn-server-common/2.6.0-cdh5.10.1/hadoop-yarn-server-common-2.6.0-cdh5.10.1.jar
         """.stripMargin.trim
       )
       volume("/database")
@@ -179,11 +207,11 @@ lazy val dockerSettings = Seq(
     }
   },
   imageNames in docker := Seq(
-    sbtdocker.ImageName(namespace = Some("velvia"),
+    sbtdocker.ImageName(namespace = Some("codegerm"),
                         repository = "spark-jobserver",
                         tag = Some(
                           s"${version.value}" +
-                          s".mesos-${Versions.mesos.split('-')(0)}" +
+                          s".cdh-5.x" +
                           s".spark-${Versions.spark}" +
                           s".scala-${scalaBinaryVersion.value}" +
                           s".jdk-${Versions.java}")
