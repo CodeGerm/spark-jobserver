@@ -187,6 +187,8 @@ lazy val dockerSettings = Seq(
            |wget http://central.maven.org/maven2/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar && \\
            |wget http://central.maven.org/maven2/commons-beanutils/commons-beanutils-core/1.8.0/commons-beanutils-core-1.8.0.jar && \\
            |wget http://central.maven.org/maven2/com/google/guava/guava/14.0.1/guava-14.0.1.jar && \\
+           |wget http://central.maven.org/maven2/com/google/protobuf/protobuf-java/2.5.0/protobuf-java-2.5.0.jar && \\
+           |wget http://central.maven.org/maven2/org/apache/htrace/htrace-core4/4.0.1-incubating/htrace-core4-4.0.1-incubating.jar && \\
            |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-auth/2.6.0-cdh5.10.1/hadoop-auth-2.6.0-cdh5.10.1.jar && \\
            |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-annotations/2.6.0-cdh5.10.1/hadoop-annotations-2.6.0-cdh5.10.1.jar && \\
            |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-client/2.6.0-cdh5.10.1/hadoop-client-2.6.0-cdh5.10.1.jar && \\
@@ -199,6 +201,7 @@ lazy val dockerSettings = Seq(
            |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-yarn-api/2.6.0-cdh5.10.1/hadoop-yarn-api-2.6.0-cdh5.10.1.jar && \\
            |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-yarn-client/2.6.0-cdh5.10.1/hadoop-yarn-client-2.6.0-cdh5.10.1.jar && \\
            |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-yarn-common/2.6.0-cdh5.10.1/hadoop-yarn-common-2.6.0-cdh5.10.1.jar && \\
+           |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-yarn-server-web-proxy/2.6.0-cdh5.10.1/hadoop-yarn-server-web-proxy-2.6.0-cdh5.10.1.jar && \\
            |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-yarn-server-common/2.6.0-cdh5.10.1/hadoop-yarn-server-common-2.6.0-cdh5.10.1.jar
         """.stripMargin.trim
       )
