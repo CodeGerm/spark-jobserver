@@ -204,7 +204,7 @@ lazy val dockerSettings = Seq(
            |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-yarn-server-web-proxy/2.6.0-cdh5.10.1/hadoop-yarn-server-web-proxy-2.6.0-cdh5.10.1.jar && \\
            |wget https://repository.cloudera.com/artifactory/cloudera-repos/org/apache/hadoop/hadoop-yarn-server-common/2.6.0-cdh5.10.1/hadoop-yarn-server-common-2.6.0-cdh5.10.1.jar && \\
            |wget http://central.maven.org/maven2/org/codehaus/jackson/jackson-core-asl/1.9.13/jackson-core-asl-1.9.13.jar && \\
-           |wget http://central.maven.org/maven2/org/codehaus/jackson/jackson-core-asl/1.9.13/jackson-core-asl-1.9.13.jar
+           |wget http://central.maven.org/maven2/org/codehaus/jackson/jackson-mapper-asl/1.9.13/jackson-mapper-asl-1.9.13.jar
         """.stripMargin.trim
       )
       volume("/database")
