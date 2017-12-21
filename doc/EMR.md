@@ -1,5 +1,7 @@
 ## Step by step instruction on how to run Spark Job Server on EMR 4.2.0 (Spark 1.6.0)
 
+See also running in [cluster mode](cluster.md), running [YARN in client mode](yarn.md) and running on [Mesos](Mesos.md).
+
 ### Create EMR 4.2.0 cluster
 
 Create EMR cluster using AWS EMR console or aws cli.
@@ -191,7 +193,7 @@ InstanceCount=10,BidPrice=2.99,Name=sparkSlave,InstanceGroupType=CORE,InstanceTy
 3. Create test context
  ```
  # create test context
- curl -d "" 'localhost:8090/contexts/test?num-cpu-cores=1&memory-per-node=512m&spark.executor.instances=1'
+ curl -d "" "localhost:8090/contexts/test?num-cpu-cores=1&memory-per-node=512m&spark.executor.instances=1"
  # check current contexts. should return test
  curl localhost:8090/contexts
  ```
@@ -200,7 +202,7 @@ InstanceCount=10,BidPrice=2.99,Name=sparkSlave,InstanceGroupType=CORE,InstanceTy
  ```
  # run WordCount example (should be done in 1-2 sec)
  curl -d "input.string = a b c a b see" \
- 'localhost:8090/jobs?appName=testapp&classPath=spark.jobserver.WordCountExample&context=test&sync=true'
+ "localhost:8090/jobs?appName=testapp&classPath=spark.jobserver.WordCountExample&context=test&sync=true"
  ```
 
 5. Check jobs

@@ -15,7 +15,7 @@ lazy val akkaApp = Project(id = "akka-app", base = file("akka-app"))
 lazy val jobServer = Project(id = "job-server", base = file("job-server"))
   .settings(commonSettings)
   .settings(revolverSettings)
-  .settings(Assembly.settings)
+  .settings(assembly := null.asInstanceOf[File])
   .settings(
     description := "Spark as a Service: a RESTful job server for Apache Spark",
     libraryDependencies ++= sparkDeps ++ slickDeps ++ cassandraDeps ++ securityDeps ++ coreTestDeps,
@@ -31,7 +31,6 @@ lazy val jobServer = Project(id = "job-server", base = file("job-server"))
     fullClasspath in Compile <<= (fullClasspath in Compile).map { classpath =>
       extraJarPaths ++ classpath
     },
-    test in assembly := {},
     fork in Test := true
   )
   .settings(publishSettings)
@@ -44,9 +43,11 @@ lazy val jobServerTestJar = Project(id = "job-server-tests", base = file("job-se
   .settings(noPublishSettings)
   .dependsOn(jobServerApi)
   .disablePlugins(SbtScalariform)
+  .disablePlugins(ScoverageSbtPlugin) // do not include in coverage report
 
 lazy val jobServerApi = Project(id = "job-server-api", base = file("job-server-api"))
   .settings(commonSettings)
+  .settings(jobServerApiSettings)
   .settings(publishSettings)
   .disablePlugins(SbtScalariform)
 
@@ -89,14 +90,16 @@ lazy val root = Project(id = "root", base = file("."))
 lazy val jobServerExtrasSettings = revolverSettings ++ Assembly.settings ++ publishSettings ++ Seq(
   libraryDependencies ++= sparkExtraDeps,
   // Extras packages up its own jar for testing itself
-  test in Test <<= (test in Test).dependsOn(packageBin in Compile)
-    .dependsOn(clean in Compile),
+  test in Test <<= (test in Test).dependsOn(packageBin in Compile),
   fork in Test := true,
+  parallelExecution in Test := false,
   // Temporarily disable test for assembly builds so folks can package and get started.  Some tests
   // are flaky in extras esp involving paths.
   test in assembly := {},
   exportJars := true
 )
+
+lazy val jobServerApiSettings = Seq(libraryDependencies ++= sparkDeps ++ sparkExtraDeps)
 
 lazy val testPython = taskKey[Unit]("Launch a sub process to run the Python tests")
 lazy val buildPython = taskKey[Unit]("Build the python side of python support into an egg")
@@ -120,7 +123,8 @@ lazy val jobServerTestJarSettings = Seq(
 
 lazy val noPublishSettings = Seq(
   publishTo := Some(Resolver.file("Unused repo", file("target/unusedrepo"))),
-  publishArtifact := false
+  publishArtifact := false,
+  publish := {}
 )
 
 lazy val dockerSettings = Seq(
@@ -135,10 +139,10 @@ lazy val dockerSettings = Seq(
 
     val sparkBuildCmd = scalaBinaryVersion.value match {
       case "2.11" =>
-      """
-          |./dev/change-scala-version.sh 2.11 && \
-          |./dev/make-distribution.sh -Dscala-2.11 -Phadoop-2.6 -Dhadoop.version=2.6.0 -Phive -DskipTests
-      """.stripMargin.trim
+        Versions.spark match {
+          case s if s.startsWith("1") => {"./make-distribution.sh -Dscala-2.11 -Phadoop-2.6 -Dhadoop.version=2.6.0 -Phive -DskipTests"}
+          case _ => {"./dev/make-distribution.sh -Dscala-2.11 -Phadoop-2.6 -Phive -Dhadoop.version=2.6.0 -DskipTests"}
+        }
       case other => throw new RuntimeException(s"Scala version $other is not supported!")
     }
 
@@ -152,7 +156,17 @@ lazy val dockerSettings = Seq(
         """     apt-key adv --keyserver keyserver.ubuntu.com --recv E56151BF && \
                 apt-get -y update && \
                 apt-get clean
-             """)
+        """)
+      env("MAVEN_VERSION","3.3.9")
+      runRaw(
+        """mkdir -p /usr/share/maven /usr/share/maven/ref \
+          && curl -fsSL http://apache.osuosl.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz \
+          | tar -xzC /usr/share/maven --strip-components=1 \
+          && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
+        """)
+      env("MAVEN_HOME","/usr/share/maven")
+      env("MAVEN_CONFIG", "/.m2")
+
       copy(artifact, artifactTargetPath)
       copy(baseDirectory(_ / "bin" / "server_start.sh").value, file("app/server_start.sh"))
       copy(baseDirectory(_ / "bin" / "server_stop.sh").value, file("app/server_stop.sh"))
@@ -292,7 +306,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ dirSettings ++ implici
 
 lazy val scoverageSettings = {
   // Semicolon-separated list of regexs matching classes to exclude
-  coverageExcludedPackages := ".+Benchmark.*"
+  coverageExcludedPackages := ".+Benchmark.*;.+Example.*;.+TestJob"
 }
 
 lazy val publishSettings = Seq(
