@@ -135,7 +135,7 @@ lazy val dockerSettings = Seq(
     val artifactTargetPath = s"/app/${artifact.name}"
 
     //val sparkBuild = s"spark-${Versions.spark}-bin-hadoop2.6"
-    val sparkBuild = s"SPARK2-2.1.0.cloudera1-1.cdh5.7.0.p0.120904"
+    val sparkBuild = s"SPARK2-2.1.0.cloudera2-1.cdh5.7.0.p0.171658"
 
     val sparkBuildCmd = scalaBinaryVersion.value match {
       case "2.11" =>
